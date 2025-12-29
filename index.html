@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Weather App</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+}
+
+.weather-card {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    padding: 40px;
+    border-radius: 30px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.search-box {
+    display: flex;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 5px 5px 5px 20px;
+    margin-bottom: 25px;
+}
+
+input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 1rem;
+    width: 100%;
+}
+
+input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+button {
+    background: #ff7675;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 50px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #e66767;
+}
+
+.city {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.temp {
+    font-size: 4.5rem;
+    font-weight: 800;
+}
+
+.desc {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-transform: capitalize;
+}
+
+.weather-icon {
+    width: 90px;
+}
+
+.details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    padding-top: 15px;
+}
+
+.details div {
+    flex: 1;
+}
+
+.label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.value {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="weather-card">
+    <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Enter city name">
+        <button onclick="getWeather()">Search</button>
+    </div>
+
+    <div id="weatherResult">
+        <div class="city">Search a city</div>
+        <img class="weather-icon" style="display:none">
+        <div class="temp">--°C</div>
+        <div class="desc">Weather info will appear here</div>
+
+        <div class="details">
+            <div>
+                <span class="label">Humidity</span>
+                <div class="value">--%</div>
+            </div>
+            <div>
+                <span class="label">Wind</span>
+                <div class="value">-- km/h</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const apiKey = "d3a2c8d269ee422ca8a143547252912";
+
+async function getWeather() {
+    const city = document.getElementById("cityInput").value.trim();
+    const icon = document.querySelector(".weather-icon");
+
+    if (!city) {
+        alert("Please enter a city name");
+        return;
+    }
+
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+            alert(data.error.message);
+            return;
+        }
+
+        document.querySelector(".city").innerText =
+            `${data.location.name}, ${data.location.country}`;
+
+        document.querySelector(".temp").innerText =
+            Math.round(data.current.temp_c) + "°C";
+
+        document.querySelector(".desc").innerText =
+            data.current.condition.text;
+
+        document.querySelectorAll(".details .value")[0].innerText =
+            data.current.humidity + "%";
+
+        document.querySelectorAll(".details .value")[1].innerText =
+            data.current.wind_kph + " km/h";
+
+        icon.src = "https:" + data.current.condition.icon;
+        icon.style.display = "block";
+
+    } catch (error) {
+        alert("Something went wrong. Please try again.");
+        console.error(error);
+    }
+}
+
+// Enter key support
+document.getElementById("cityInput").addEventListener("keypress", e => {
+    if (e.key === "Enter") getWeather();
+});
+</script>
+
+</body>
+</html>
